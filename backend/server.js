@@ -15,7 +15,14 @@ const app = express();
 // Middleware
 app.use(helmet()); // Security Headers
 app.use(cors({
-    origin: [process.env.CLIENT_URL, 'http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175'],
+    origin: [
+        process.env.CLIENT_URL,
+        'http://localhost:5173',
+        'http://localhost:5174',
+        'http://localhost:5175',
+        'https://file-handling-system.vercel.app',
+        'https://file-handling-system-git-main-harshkumarhk07s-projects.vercel.app'
+    ],
     credentials: true
 }));
 app.use(express.json()); // Body Parser
