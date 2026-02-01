@@ -93,6 +93,7 @@ const getFiles = asyncHandler(async (req, res) => {
 // @route   POST /api/files/:id/share
 // @access  Private
 const shareFile = asyncHandler(async (req, res) => {
+
     const { email, permission } = req.body;
     const file = await File.findById(req.params.id);
 
@@ -107,7 +108,9 @@ const shareFile = asyncHandler(async (req, res) => {
         throw new Error('Not authorized to share this file');
     }
 
-    const userToShare = await User.findOne({ email });
+    // Lookup user case-insensitively
+    const userToShare = await User.findOne({ email: { $regex: `^${email.trim()}$`, $options: 'i' } });
+
     if (!userToShare) {
         res.status(404);
         throw new Error('User not found');

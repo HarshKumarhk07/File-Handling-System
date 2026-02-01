@@ -78,6 +78,7 @@ app.post('/api/debug/create-test-user', async (req, res, next) => {
     try {
         const User = require('./models/userModel');
         const testEmail = `test-${Date.now()}@debug.local`;
+
         const user = await User.create({ name: 'Debug User', email: testEmail, password: 'test123456', role: 'user' });
         const count = await User.countDocuments();
         console.log(`[Debug] Created test user: ${testEmail}, total users: ${count}`);
@@ -99,6 +100,7 @@ app.use(notFound);
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
+
 
 const startServer = async () => {
     await connectDB();

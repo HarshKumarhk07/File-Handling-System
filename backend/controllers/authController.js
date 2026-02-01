@@ -14,9 +14,9 @@ const registerUser = asyncHandler(async (req, res) => {
         throw new Error('Please add all fields');
     }
 
-    // Check if user exists (case-insensitive)
-    const emailLower = email.toLowerCase();
-    const userExists = await User.findOne({ email: new RegExp(`^${emailLower.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') });
+
+    // Check if user exists
+    const userExists = await User.findOne({ email: { $regex: `^${email.trim()}$`, $options: 'i' } });
 
     if (userExists) {
         res.status(400);
@@ -24,12 +24,16 @@ const registerUser = asyncHandler(async (req, res) => {
     }
 
     // Super Admin: ADMIN_EMAIL gets admin role
-    const role = process.env.ADMIN_EMAIL && emailLower === process.env.ADMIN_EMAIL.toLowerCase() ? 'admin' : 'user';
+    const role = process.env.ADMIN_EMAIL && email.toLowerCase().trim() === process.env.ADMIN_EMAIL.toLowerCase() ? 'admin' : 'user';
+
+    // Hash password manually (removed model hook)
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
 
     const user = await User.create({
         name,
-        email: emailLower,
-        password,
+        email: email.trim(), // Store exact casing
+        password: hashedPassword,
         role
     });
 
@@ -59,9 +63,9 @@ const registerUser = asyncHandler(async (req, res) => {
 const loginUser = asyncHandler(async (req, res) => {
     const { email, password } = req.body;
 
-    // Check for user email (case-insensitive)
-    const emailLower = email.toLowerCase();
-    const user = await User.findOne({ email: new RegExp(`^${emailLower.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') });
+
+    // Check for user email
+    const user = await User.findOne({ email: { $regex: `^${email.trim()}$`, $options: 'i' } });
 
     // 1. Check if user exists
     if (!user) {
@@ -72,7 +76,7 @@ const loginUser = asyncHandler(async (req, res) => {
     // 2. Check if password matches
     if (await user.matchPassword(password)) {
         // Legacy: Ensure ADMIN_EMAIL user has admin role (in case they registered before ADMIN_EMAIL was set)
-        if (process.env.ADMIN_EMAIL && emailLower === process.env.ADMIN_EMAIL.toLowerCase() && user.role !== 'admin') {
+        if (process.env.ADMIN_EMAIL && user.email.toLowerCase() === process.env.ADMIN_EMAIL.toLowerCase() && user.role !== 'admin') {
             user.role = 'admin';
             await user.save();
         }

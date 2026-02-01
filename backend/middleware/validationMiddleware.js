@@ -21,8 +21,7 @@ const validateRegister = [
         .trim()
         .notEmpty().withMessage('Email is required')
         .isEmail().withMessage('Please include a valid email')
-        .custom(rejectInvalidTld)
-        .toLowerCase(),
+        .custom(rejectInvalidTld),
     check('password')
         .notEmpty().withMessage('Password is required')
         .isLength({ min: 6 }).withMessage('Password must be at least 6 characters')
@@ -33,8 +32,7 @@ const validateLogin = [
         .trim()
         .notEmpty().withMessage('Email is required')
         .isEmail().withMessage('Please include a valid email')
-        .custom(rejectInvalidTld)
-        .toLowerCase(),
+        .custom(rejectInvalidTld),
     check('password')
         .notEmpty().withMessage('Password is required')
 ];
