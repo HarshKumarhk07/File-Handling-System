@@ -35,6 +35,8 @@ const getAllFiles = asyncHandler(async (req, res) => {
     });
 });
 
+const { SUPER_ADMIN_EMAIL, isSuperAdmin } = require('../config/security');
+
 // @desc    Update user role (Promote/Demote)
 // @route   PUT /api/admin/users/:id/role
 // @access  Private/Admin
@@ -45,16 +47,35 @@ const updateUserRole = asyncHandler(async (req, res) => {
         throw new Error('Invalid role. Use "user" or "admin"');
     }
 
-    const user = await User.findById(req.params.id);
-    if (!user) {
+    const targetUser = await User.findById(req.params.id);
+    if (!targetUser) {
         res.status(404);
         throw new Error('User not found');
     }
 
-    user.role = role;
-    await user.save();
+    // --- SECURITY GUARD ---
+    // 1. Protect Super Admin from being modified by ANYONE
+    if (isSuperAdmin(targetUser.email)) {
+        console.warn(`SECURITY ALERT: Attempted modification of Super Admin account`, {
+            by: req.user.email,
+            target: targetUser.email,
+            timestamp: new Date().toISOString()
+        });
+        res.status(403);
+        throw new Error('Super Admin account is protected');
+    }
 
-    res.json({ _id: user._id, name: user.name, email: user.email, role: user.role });
+    // 2. Prevent Self-Demotion (Applies to ALL Admins)
+    if (req.user._id.toString() === targetUser._id.toString() && role !== 'admin') {
+        res.status(403);
+        throw new Error('Action Forbidden: You cannot demote yourself.');
+    }
+    // ----------------------
+
+    targetUser.role = role;
+    await targetUser.save();
+
+    res.json({ _id: targetUser._id, name: targetUser.name, email: targetUser.email, role: targetUser.role });
 });
 
 // @desc    Get system stats

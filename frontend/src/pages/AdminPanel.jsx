@@ -104,7 +104,11 @@ const AdminPanel = () => {
                                             </td>
                                             <td className="p-4 text-gray-400 whitespace-nowrap">{new Date(u.createdAt).toLocaleDateString()}</td>
                                             <td className="p-4 whitespace-nowrap">
-                                                {u.role === 'admin' ? (
+                                                {u.email.toLowerCase() === 'admin@minidrive.com' ? (
+                                                    <span className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg shadow-purple-500/30 border border-purple-400/50">
+                                                        SUPER ADMIN
+                                                    </span>
+                                                ) : u.role === 'admin' ? (
                                                     <button
                                                         onClick={() => handleUpdateRole(u._id, 'user')}
                                                         className="text-amber-400 hover:text-amber-300 px-2 py-1 rounded text-sm flex items-center gap-1"
