@@ -46,13 +46,28 @@ const Dashboard = () => {
     const fetchFiles = async () => {
         setLoading(true);
         try {
-            const { data } = await API.get(`/files?page=${page}&limit=8`);
-            setFiles(data.files ?? []);
-            setTotalPages(data.pages ?? 1);
+            let endpoint = `/files?page=${page}&limit=8`;
+
+            // SECURITY: Only allow admin endpoint if user is actually admin
+            if (viewMode === 'all' && user?.role === 'admin') {
+                endpoint = `/admin/files?page=${page}&limit=8`;
+            }
+
+            const { data } = await API.get(endpoint);
+
+            // Validate response shape
+            if (data && Array.isArray(data.files)) {
+                setFiles(data.files);
+                setTotalPages(data.pages ?? 1);
+            } else {
+                setFiles([]);
+                setTotalPages(1);
+            }
         } catch (error) {
             if (error.response?.status !== 401) {
                 toast.error(error.response?.data?.message || 'Failed to load files');
             }
+            setFiles([]);
         } finally {
             setLoading(false);
         }
@@ -91,17 +106,17 @@ const Dashboard = () => {
             <main className="container mx-auto px-4 py-8">
                 {/* Header Section */}
                 <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
-                    <div>
+                    <div className="w-full md:w-auto">
                         {user?.role === 'admin' && (
                             <div className="flex gap-2 mb-2">
                                 <button
-                                    onClick={() => setViewMode('mine')}
+                                    onClick={() => { setViewMode('mine'); setPage(1); }}
                                     className={`px-3 py-1 rounded-lg text-sm font-medium transition ${viewMode === 'mine' ? 'bg-blue-600 text-white' : 'bg-gray-700 text-gray-400 hover:text-white'}`}
                                 >
                                     My Files
                                 </button>
                                 <button
-                                    onClick={() => setViewMode('all')}
+                                    onClick={() => { setViewMode('all'); setPage(1); }}
                                     className={`px-3 py-1 rounded-lg text-sm font-medium transition ${viewMode === 'all' ? 'bg-purple-600 text-white' : 'bg-gray-700 text-gray-400 hover:text-white'}`}
                                 >
                                     All Files
@@ -114,8 +129,8 @@ const Dashboard = () => {
                         <p className="text-gray-400 text-sm mt-1">Manage your documents securely.</p>
                     </div>
 
-                    <div className="flex items-center gap-4 w-full md:w-auto">
-                        <div className="relative group w-full md:w-64">
+                    <div className="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto">
+                        <div className="relative group w-full sm:w-64">
                             <FaSearch className="absolute left-3 top-3.5 text-gray-500 group-focus-within:text-blue-400 transition" />
                             <input
                                 type="text"
@@ -129,7 +144,7 @@ const Dashboard = () => {
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                             onClick={() => setIsUploadOpen(true)}
-                            className="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-3 rounded-xl font-semibold shadow-lg shadow-blue-500/30 flex items-center gap-2 whitespace-nowrap hover:shadow-blue-500/50 transition-all"
+                            className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-3 rounded-xl font-semibold shadow-lg shadow-blue-500/30 flex items-center justify-center gap-2 whitespace-nowrap hover:shadow-blue-500/50 transition-all"
                         >
                             <FaPlus /> Upload New
                         </motion.button>
@@ -138,11 +153,11 @@ const Dashboard = () => {
 
                 {/* Content Section */}
                 {loading ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                         {[...Array(8)].map((_, i) => <SkeletonLoader key={i} />)}
                     </div>
                 ) : filteredFiles.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                         <AnimatePresence>
                             {filteredFiles.map(file => (
                                 <FileCard
@@ -166,7 +181,7 @@ const Dashboard = () => {
                             <FaFolderOpen size={40} className="text-gray-600" />
                         </div>
                         <h3 className="text-xl font-bold text-gray-300 mb-2">No files found</h3>
-                        <p className="text-gray-500 mb-6">Your workspace is empty. Start by uploading a file.</p>
+                        <p className="text-gray-500 mb-6">Your workspace is empty or no files match your search.</p>
                         <button onClick={() => setIsUploadOpen(true)} className="text-blue-400 hover:text-blue-300 font-medium">
                             Upload your first file
                         </button>

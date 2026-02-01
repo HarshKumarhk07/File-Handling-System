@@ -43,7 +43,7 @@ const Login = () => {
     };
 
     return (
-        <div className="flex justify-center items-center min-h-screen relative overflow-hidden">
+        <div className="flex justify-center items-center min-h-screen relative overflow-hidden bg-gray-900 px-4">
             {/* Background Elements */}
             <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-blue-600 blur-[120px] opacity-20 animate-pulse"></div>
             <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-purple-600 blur-[120px] opacity-20 animate-pulse delay-1000"></div>
@@ -52,10 +52,10 @@ const Login = () => {
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.5 }}
-                className="glass-panel p-10 rounded-2xl shadow-2xl w-full max-w-md relative z-10"
+                className="glass-panel p-6 sm:p-10 rounded-2xl shadow-2xl w-full max-w-[400px] sm:max-w-md relative z-10"
             >
                 <div className="text-center mb-8">
-                    <h2 className="text-4xl font-bold text-white mb-2 tracking-tight">Welcome Back</h2>
+                    <h2 className="text-3xl sm:text-4xl font-bold text-white mb-2 tracking-tight">Welcome Back</h2>
                     <p className="text-gray-400">Sign in to continue your journey</p>
                 </div>
 
