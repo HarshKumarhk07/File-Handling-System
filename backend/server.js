@@ -12,6 +12,9 @@ dotenv.config();
 
 const app = express();
 
+// Trust proxy is required for rate limiting behind load balancers (Render, Vercel, etc.)
+app.set('trust proxy', 1);
+
 // Middleware
 app.use(helmet()); // Security Headers
 app.use(cors({
