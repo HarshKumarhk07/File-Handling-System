@@ -7,6 +7,7 @@ import FileCard from '../components/FileCard';
 import UploadModal from '../components/UploadModal';
 import ShareModal from '../components/ShareModal';
 import PreviewModal from '../components/PreviewModal';
+import DeleteModal from '../components/DeleteModal';
 import SkeletonLoader from '../components/SkeletonLoader';
 import { FaPlus, FaSearch, FaFolderOpen } from 'react-icons/fa';
 import { toast } from 'react-toastify';
@@ -31,6 +32,11 @@ const Dashboard = () => {
     // Preview Modal State
     const [isPreviewOpen, setIsPreviewOpen] = useState(false);
     const [previewFile, setPreviewFile] = useState(null);
+
+    // Delete Modal State
+    const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+    const [fileToDelete, setFileToDelete] = useState(null);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     const navigate = useNavigate();
 
@@ -73,14 +79,24 @@ const Dashboard = () => {
         }
     };
 
-    const handleDelete = async (id) => {
-        if (!window.confirm('Are you sure you want to delete this file?')) return;
+    const handleDeleteClick = (file) => {
+        setFileToDelete(file);
+        setIsDeleteOpen(true);
+    };
+
+    const handleConfirmDelete = async () => {
+        if (!fileToDelete) return;
+        setIsDeleting(true);
         try {
-            await API.delete(`/files/${id}`);
-            setFiles(prev => (prev ?? []).filter(file => file._id !== id));
+            await API.delete(`/files/${fileToDelete._id}`);
+            setFiles(prev => (prev ?? []).filter(file => file._id !== fileToDelete._id));
             toast.success('File deleted');
+            setIsDeleteOpen(false);
+            setFileToDelete(null);
         } catch (error) {
             toast.error(error.response?.data?.message || 'Failed to delete');
+        } finally {
+            setIsDeleting(false);
         }
     };
 
@@ -163,7 +179,7 @@ const Dashboard = () => {
                                 <FileCard
                                     key={file._id}
                                     file={file}
-                                    onDelete={handleDelete}
+                                    onDelete={() => handleDeleteClick(file)}
                                     onShare={handleShare}
                                     onPreview={handlePreview}
                                     currentUser={user}
@@ -230,7 +246,15 @@ const Dashboard = () => {
                 onClose={() => { setIsPreviewOpen(false); setPreviewFile(null); }}
                 file={previewFile}
             />
-        </div >
+
+            <DeleteModal
+                isOpen={isDeleteOpen}
+                onClose={() => setIsDeleteOpen(false)}
+                onConfirm={handleConfirmDelete}
+                fileName={fileToDelete?.originalName}
+                loading={isDeleting}
+            />
+        </div>
     );
 };
 

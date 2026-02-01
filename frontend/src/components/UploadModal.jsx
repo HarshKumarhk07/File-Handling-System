@@ -104,7 +104,10 @@ const UploadModal = ({ isOpen, onClose, onUploadSuccess }) => {
                     {uploading && (
                         <div className="mt-6">
                             <div className="flex justify-between text-sm text-gray-400 mb-1">
-                                <span>Uploading...</span>
+                                <span className="flex items-center gap-2">
+                                    <div className="w-4 h-4 border-2 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
+                                    Uploading...
+                                </span>
                                 <span>{progress}%</span>
                             </div>
                             <div className="w-full bg-gray-700 rounded-full h-2.5">

@@ -10,6 +10,7 @@ const Register = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
+    const [loading, setLoading] = useState(false);
     const { register } = useContext(AuthContext);
     const navigate = useNavigate();
 
@@ -35,6 +36,7 @@ const Register = () => {
             return;
         }
 
+        setLoading(true);
         try {
             await register(name, email, password);
             toast.success('Registration successful!');
@@ -44,6 +46,8 @@ const Register = () => {
                 ? 'Too many requests. Please wait a few minutes and try again.'
                 : (error.response?.data?.message || 'Registration failed');
             toast.error(msg);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -74,6 +78,7 @@ const Register = () => {
                             value={name}
                             onChange={(e) => setName(e.target.value)}
                             required
+                            disabled={loading}
                         />
                     </div>
                     <div>
@@ -85,6 +90,7 @@ const Register = () => {
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             required
+                            disabled={loading}
                         />
                     </div>
                     <div>
@@ -97,6 +103,7 @@ const Register = () => {
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 required
+                                disabled={loading}
                             />
                             <button
                                 type="button"
@@ -104,6 +111,7 @@ const Register = () => {
                                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-300 transition"
                                 tabIndex={-1}
                                 aria-label={showPassword ? 'Hide password' : 'Show password'}
+                                disabled={loading}
                             >
                                 {showPassword ? <FaEyeSlash size={18} /> : <FaEye size={18} />}
                             </button>
@@ -111,9 +119,17 @@ const Register = () => {
                     </div>
                     <button
                         type="submit"
-                        className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold py-3.5 rounded-xl transition-all transform hover:scale-[1.02] shadow-lg shadow-emerald-500/25"
+                        disabled={loading}
+                        className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold py-3.5 rounded-xl transition-all transform hover:scale-[1.02] shadow-lg shadow-emerald-500/25 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"
                     >
-                        Sign Up
+                        {loading ? (
+                            <>
+                                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                Signing Up...
+                            </>
+                        ) : (
+                            'Sign Up'
+                        )}
                     </button>
                 </form>
                 <p className="text-gray-400 mt-8 text-center text-sm">

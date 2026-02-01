@@ -12,6 +12,8 @@ const Login = () => {
     const { login } = useContext(AuthContext);
     const navigate = useNavigate();
 
+    const [loading, setLoading] = useState(false);
+
     const validateEmail = (email) => {
         // Standard email format
         const re = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -30,6 +32,7 @@ const Login = () => {
             return;
         }
 
+        setLoading(true);
         try {
             await login(email, password);
             toast.success('Logged in successfully!');
@@ -39,6 +42,8 @@ const Login = () => {
                 ? 'Too many requests. Please wait a few minutes and try again.'
                 : (error.response?.data?.message || 'Login failed');
             toast.error(msg);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -69,6 +74,7 @@ const Login = () => {
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             required
+                            disabled={loading}
                         />
                     </div>
                     <div>
@@ -81,6 +87,7 @@ const Login = () => {
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 required
+                                disabled={loading}
                             />
                             <button
                                 type="button"
@@ -88,6 +95,7 @@ const Login = () => {
                                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-300 transition"
                                 tabIndex={-1}
                                 aria-label={showPassword ? 'Hide password' : 'Show password'}
+                                disabled={loading}
                             >
                                 {showPassword ? <FaEyeSlash size={18} /> : <FaEye size={18} />}
                             </button>
@@ -95,9 +103,17 @@ const Login = () => {
                     </div>
                     <button
                         type="submit"
-                        className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold py-3.5 rounded-xl transition-all transform hover:scale-[1.02] shadow-lg shadow-blue-500/25"
+                        disabled={loading}
+                        className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold py-3.5 rounded-xl transition-all transform hover:scale-[1.02] shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"
                     >
-                        Sign In
+                        {loading ? (
+                            <>
+                                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                Signing In...
+                            </>
+                        ) : (
+                            'Sign In'
+                        )}
                     </button>
                 </form>
                 <p className="text-gray-400 mt-8 text-center text-sm">
