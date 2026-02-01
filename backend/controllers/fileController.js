@@ -3,6 +3,20 @@ const User = require('../models/userModel');
 const File = require('../models/fileModel');
 const { uploadToCloudinary, deleteFromCloudinary } = require('../services/cloudinaryService');
 
+// Helper to add history and enforce limit
+const addToHistory = async (file, action, userId, details = '') => {
+    file.history.push({
+        action,
+        performedBy: userId,
+        details
+    });
+
+    // Enforce 50 item limit
+    if (file.history.length > 50) {
+        file.history.shift(); // Remove oldest
+    }
+};
+
 // @desc    Upload a file
 // @route   POST /api/files/upload
 // @access  Private
@@ -14,7 +28,7 @@ const uploadFile = asyncHandler(async (req, res) => {
 
     try {
         // Upload to Cloudinary using Service
-        const result = await uploadToCloudinary(req.file.buffer, req.user._id, req.file.originalname);
+        const result = await uploadToCloudinary(req.file.buffer, req.user._id, req.file.originalname, req.file.mimetype);
 
         // Save to DB
         const file = await File.create({
@@ -23,7 +37,12 @@ const uploadFile = asyncHandler(async (req, res) => {
             publicId: result.public_id,
             size: result.bytes,
             mimetype: result.format ? `image/${result.format}` : req.file.mimetype, // Cloudinary might change format
-            owner: req.user._id
+            owner: req.user._id,
+            history: [{ // Initial History
+                action: 'UPLOAD',
+                performedBy: req.user._id,
+                timestamp: Date.now()
+            }]
         });
 
         res.status(201).json(file);
@@ -57,7 +76,8 @@ const getFiles = asyncHandler(async (req, res) => {
         .skip(skip)
         .limit(limit)
         .populate('owner', 'name email') // Populate owner details
-        .populate('sharedWith.user', 'name email'); // Populate shared users
+        .populate('sharedWith.user', 'name email')
+        .populate('history.performedBy', 'name email'); // Populate history users
 
     const total = await File.countDocuments(query);
 
@@ -106,12 +126,14 @@ const shareFile = asyncHandler(async (req, res) => {
     if (existingShareIndex > -1) {
         // Update permission
         file.sharedWith[existingShareIndex].permission = permission || 'view';
+        await addToHistory(file, 'SHARE', req.user._id, `Updated permission for ${userToShare.email}`);
     } else {
         // Add new share
         file.sharedWith.push({
             user: userToShare._id,
             permission: permission || 'view'
         });
+        await addToHistory(file, 'SHARE', req.user._id, `Shared with ${userToShare.email}`);
     }
 
     await file.save();
@@ -136,10 +158,18 @@ const revokeShare = asyncHandler(async (req, res) => {
     }
 
     const targetId = userId;
+    // Find who we are removing for history log
+    const userRemoved = file.sharedWith.find(s => {
+        const shareUserId = s.user?._id?.toString?.() ?? s.user?.toString?.();
+        return shareUserId === targetId;
+    });
+
     file.sharedWith = file.sharedWith.filter(s => {
         const shareUserId = s.user?._id?.toString?.() ?? s.user?.toString?.();
         return shareUserId !== targetId;
     });
+
+    await addToHistory(file, 'REVOKE', req.user._id, `Revoked access for ${userRemoved?.user?.email || 'user'}`);
     await file.save();
 
     res.json(file);
@@ -171,6 +201,10 @@ const deleteFile = asyncHandler(async (req, res) => {
     // Soft Delete
     file.isDeleted = true;
     file.deletedAt = Date.now();
+
+    const details = isAdmin && !isOwner ? `Deleted by Admin ${req.user.name}` : 'File deleted';
+    await addToHistory(file, 'DELETE', req.user._id, details);
+
     await file.save();
 
     res.json({ message: 'File moved to recycle bin' });

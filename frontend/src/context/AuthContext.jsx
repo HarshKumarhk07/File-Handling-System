@@ -1,11 +1,13 @@
 import { createContext, useState, useEffect } from 'react';
 import API from '../services/api';
+import { useNavigate } from 'react-router-dom';
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const storedUser = JSON.parse(localStorage.getItem('user'));
@@ -37,7 +39,9 @@ export const AuthProvider = ({ children }) => {
 
     const logout = () => {
         localStorage.removeItem('user');
+        sessionStorage.clear(); // Clear session storage as requested
         setUser(null);
+        window.location.href = '/'; // Hard redirect to ensure state clear and landing page load
     };
 
     return (

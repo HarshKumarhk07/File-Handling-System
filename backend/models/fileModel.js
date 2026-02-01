@@ -43,10 +43,31 @@ const fileSchema = new mongoose.Schema({
     },
     expiresAt: {
         type: Date
-    }
+    },
+    history: [{
+        action: {
+            type: String,
+            enum: ['UPLOAD', 'DELETE', 'SHARE', 'REVOKE'],
+            required: true
+        },
+        performedBy: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User'
+        },
+        details: {
+            type: String
+        },
+        timestamp: {
+            type: Date,
+            default: Date.now
+        }
+    }]
 }, {
     timestamps: true
 });
+
+// Limit history to 50 items (This is cleaner handling in controller, but definition sits here)
+
 
 // Index on createdAt for sorting performance
 fileSchema.index({ createdAt: -1 });

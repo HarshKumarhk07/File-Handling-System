@@ -4,11 +4,14 @@ import { FaTimes, FaShareAlt, FaUserPlus, FaUserMinus } from 'react-icons/fa';
 import API from '../services/api';
 import { toast } from 'react-toastify';
 
+import ConfirmationModal from './ConfirmationModal';
+
 const ShareModal = ({ isOpen, onClose, file, onShareSuccess }) => {
     const [email, setEmail] = useState('');
     const [permission, setPermission] = useState('view');
     const [loading, setLoading] = useState(false);
     const [revoking, setRevoking] = useState(null);
+    const [revokeUser, setRevokeUser] = useState(null);
     const fileId = file?._id;
 
     const sharedUsers = file?.sharedWith ?? [];
@@ -30,17 +33,22 @@ const ShareModal = ({ isOpen, onClose, file, onShareSuccess }) => {
         }
     };
 
-    const handleRevoke = async (userId) => {
-        if (!fileId || !window.confirm('Revoke access for this user?')) return;
-        setRevoking(userId);
+    const handleRevokeClick = (userId) => {
+        setRevokeUser(userId);
+    };
+
+    const executeRevoke = async () => {
+        if (!fileId || !revokeUser) return;
+        setRevoking(revokeUser);
         try {
-            await API.delete(`/files/${fileId}/share/${userId}`);
+            await API.delete(`/files/${fileId}/share/${revokeUser}`);
             toast.success('Access revoked');
             onShareSuccess();
         } catch (error) {
             toast.error(error.response?.data?.message || 'Failed to revoke');
         } finally {
             setRevoking(null);
+            setRevokeUser(null);
         }
     };
 
@@ -95,7 +103,7 @@ const ShareModal = ({ isOpen, onClose, file, onShareSuccess }) => {
                                                 <span className="text-gray-500 text-xs mr-2">{s.permission}</span>
                                                 <button
                                                     type="button"
-                                                    onClick={() => handleRevoke(shareUserId)}
+                                                    onClick={() => handleRevokeClick(shareUserId)}
                                                     disabled={revoking === shareUserId}
                                                     className="text-red-400 hover:text-red-300 p-1 rounded disabled:opacity-50"
                                                     title="Revoke access"
@@ -145,7 +153,15 @@ const ShareModal = ({ isOpen, onClose, file, onShareSuccess }) => {
                     </motion.div>
                 </div>
             )}
-        </AnimatePresence>
+            <ConfirmationModal
+                isOpen={!!revokeUser}
+                onClose={() => setRevokeUser(null)}
+                onConfirm={executeRevoke}
+                title="Revoke Access?"
+                message={`Are you sure you want to remove access for this user?`}
+                type="revoke"
+            />
+        </AnimatePresence >
     );
 };
 

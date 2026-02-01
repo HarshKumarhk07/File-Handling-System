@@ -21,112 +21,143 @@ const FileCard = ({ file, onDelete, onShare, onPreview, currentUser }) => {
     const isSharedWithMe = !isOwner;
 
     return (
-        <motion.div
-            layout
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            className="bg-gray-800/50 backdrop-blur-md border border-gray-700/50 rounded-xl p-4 hover:shadow-xl hover:bg-gray-800/80 transition-all group relative overflow-hidden"
-        >
-            {/* Shared Indicator Badge */}
-            {isSharedWithMe && (
-                <div className={`absolute top-0 right-0 px-2 py-1 text-[10px] font-bold uppercase rounded-bl-lg z-10 ${canDelete ? 'bg-green-600/80 text-white' : 'bg-yellow-600/80 text-white'}`}>
-                    {canDelete ? <span className="flex items-center gap-1"><FaPen size={8} /> Editor</span> : <span className="flex items-center gap-1"><FaLock size={8} /> Viewer</span>}
+        <>
+            <motion.div
+                layout
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                className="glass-card p-5 relative flex flex-col h-full hover:border-emerald-500/30 transition-colors"
+            >
+                {/* Shared Indicator Badge */}
+                {isSharedWithMe && (
+                    <div className={`absolute top-0 right-0 px-3 py-1 text-[10px] font-bold uppercase rounded-bl-xl z-20 backdrop-blur-md shadow-lg ${canDelete ? 'bg-emerald-500/80 text-white' : 'bg-amber-500/80 text-white'}`}>
+                        {canDelete ? <span className="flex items-center gap-1"><FaPen size={8} /> Editor</span> : <span className="flex items-center gap-1"><FaLock size={8} /> Viewer</span>}
+                    </div>
+                )}
+
+                <div className="flex items-center gap-4 mb-4">
+                    <div className={`p-3.5 rounded-xl shadow-inner ${file.mimetype?.startsWith('image/') ? 'bg-teal-500/10 text-teal-400' : 'bg-emerald-500/10 text-emerald-400'}`}>
+                        {file.mimetype?.startsWith('image/') ? <FaImage size={24} /> : <FaFileAlt size={24} />}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                        <h3 className="text-white font-medium truncate text-lg" title={file.originalName}>{file.originalName}</h3>
+                        <p className="text-gray-400 text-xs truncate flex items-center gap-1">
+                            {isOwner ? 'Me' : `Shared by ${file.owner?.name || 'User'}`}
+                            <span className="w-1 h-1 rounded-full bg-gray-600 inline-block mx-1"></span>
+                            {file.size >= 1024 * 1024 ? `${(file.size / 1024 / 1024).toFixed(2)} MB` : `${(file.size / 1024).toFixed(2)} KB`}
+                        </p>
+                    </div>
                 </div>
-            )}
 
-            <div className="flex items-center gap-4 mb-3">
-                <div className={`p-3 rounded-lg ${file.mimetype?.startsWith('image/') ? 'bg-purple-500/20 text-purple-400' : 'bg-blue-500/20 text-blue-400'}`}>
-                    {file.mimetype?.startsWith('image/') ? <FaImage size={24} /> : <FaFileAlt size={24} />}
-                </div>
-                <div className="flex-1 min-w-0">
-                    <h3 className="text-white font-medium truncate" title={file.originalName}>{file.originalName}</h3>
-                    <p className="text-gray-400 text-xs truncate">
-                        {isOwner ? 'Me' : `Shared by ${file.owner?.name || 'User'}`} • {file.size >= 1024 * 1024 ? `${(file.size / 1024 / 1024).toFixed(2)} MB` : `${(file.size / 1024).toFixed(2)} KB`}
-                    </p>
-                </div>
-            </div>
-
-            {/* Preview (if image) - Clickable to open full preview */}
-            {file.mimetype?.startsWith('image/') && (
-                <button
-                    onClick={() => onPreview?.(file)}
-                    className="h-24 w-full bg-gray-900/50 rounded-lg mb-3 overflow-hidden block w-full text-left focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg"
-                >
-                    <img src={file.url} alt={file.originalName} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity cursor-pointer" />
-                </button>
-            )}
-
-            {/* Preview button for non-images */}
-            {!file.mimetype?.startsWith('image/') && onPreview && (
-                <button
-                    onClick={() => onPreview(file)}
-                    className="w-full mb-3 py-2 flex items-center justify-center gap-2 text-sm text-blue-400 hover:text-blue-300 hover:bg-blue-500/10 rounded-lg transition"
-                >
-                    <FaEye size={14} /> Preview
-                </button>
-            )}
-
-            <div className="flex justify-between items-center mt-2 pt-2 border-t border-gray-700/50">
-                <div className="flex items-center gap-3">
-                    {file.mimetype?.startsWith('image/') && (
+                {/* Preview (if image) - Clickable to open full preview */}
+                {file.mimetype?.startsWith('image/') && (
+                    <div className="flex-grow mb-4">
                         <button
                             onClick={() => onPreview?.(file)}
-                            className="text-gray-400 hover:text-blue-400 transition flex items-center gap-1 text-sm"
+                            className="w-full h-32 bg-black/20 rounded-xl overflow-hidden block focus:outline-none focus:ring-2 focus:ring-emerald-500/50 border border-white/5 relative hover:border-emerald-500/20 transition-colors"
                         >
-                            <FaEye size={14} /> View
+                            <img src={file.url} alt={file.originalName} className="w-full h-full object-cover opacity-80 hover:opacity-100 hover:scale-105 transition-all duration-500 cursor-pointer" />
                         </button>
-                    )}
-                    <button
-                        onClick={async () => {
-                            setDownloading(true);
-                            try {
-                                const res = await API.get(`/files/${file._id}/download`, {
-                                    responseType: 'blob'
-                                });
-                                const url = URL.createObjectURL(res.data);
-                                const a = document.createElement('a');
-                                a.href = url;
-                                a.download = file.originalName || 'download';
-                                a.click();
-                                URL.revokeObjectURL(url);
-                            } catch {
-                                window.open(file.url, '_blank');
-                            } finally {
-                                setDownloading(false);
-                            }
-                        }}
-                        disabled={downloading}
-                        className="text-gray-400 hover:text-blue-400 transition flex items-center gap-1 text-sm disabled:opacity-50"
-                    >
-                        <FaDownload size={14} /> {downloading ? 'Downloading...' : 'Download'}
-                    </button>
-                </div>
-                <div className="flex gap-2">
-                    {/* Share Button (Only Owner) */}
-                    {isOwner && (
-                        <button
-                            onClick={() => onShare(file)}
-                            className="bg-indigo-600/20 hover:bg-indigo-600 text-indigo-400 hover:text-white p-2 rounded-lg transition"
-                            title="Share"
-                        >
-                            <FaShareAlt size={14} />
-                        </button>
-                    )}
+                    </div>
+                )}
 
-                    {/* Delete Button (Owner or Editor) */}
-                    {canDelete && (
-                        <button
-                            onClick={() => onDelete(file._id)}
-                            className="bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-white p-2 rounded-lg transition"
-                            title="Delete"
+                {/* PDF Preview - Thumbnail style */}
+                {!file.mimetype?.startsWith('image/') && (file.mimetype === 'application/pdf' || file.originalName?.toLowerCase().endsWith('.pdf')) && (
+                    <div className="flex-grow mb-4 relative group">
+                        <div
+                            onClick={() => onPreview?.(file)}
+                            className="w-full h-32 bg-white rounded-xl overflow-hidden block border border-white/5 relative hover:border-emerald-500/20 transition-colors cursor-pointer"
                         >
-                            <FaTrash size={14} />
+                            <iframe
+                                src={`https://docs.google.com/viewer?url=${encodeURIComponent(file.url)}&embedded=true`}
+                                className="w-full h-full object-cover pointer-events-none border-0"
+                                title="PDF Preview"
+                                tabIndex="-1"
+                            />
+                            {/* Overlay to capture clicks */}
+                            <div className="absolute inset-0 bg-transparent" />
+                        </div>
+                    </div>
+                )}
+
+                {/* Preview button for other non-images/non-PDFs */}
+                {!file.mimetype?.startsWith('image/') && !(file.mimetype === 'application/pdf' || file.originalName?.toLowerCase().endsWith('.pdf')) && onPreview && (
+                    <div className="flex-grow flex items-center justify-center mb-4">
+                        <button
+                            onClick={() => onPreview(file)}
+                            className="w-full py-6 flex flex-col items-center justify-center gap-2 text-sm text-gray-400 hover:text-white bg-white/5 hover:bg-white/10 rounded-xl border border-white/5 transition-all group"
+                        >
+                            <FaEye size={20} className="text-emerald-500 mb-1 group-hover:scale-110 transition-transform" />
+                            Quick Preview
                         </button>
-                    )}
+                    </div>
+                )}
+
+                <div className="mt-auto pt-4 border-t border-white/5 flex justify-between items-center gap-3">
+                    <div className="flex items-center gap-2">
+                        {file.mimetype?.startsWith('image/') && (
+                            <button
+                                onClick={() => onPreview?.(file)}
+                                className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition"
+                                title="View"
+                            >
+                                <FaEye size={16} />
+                            </button>
+                        )}
+                        <button
+                            onClick={async () => {
+                                setDownloading(true);
+                                try {
+                                    const res = await API.get(`/files/${file._id}/download`, {
+                                        responseType: 'blob'
+                                    });
+                                    const url = URL.createObjectURL(res.data);
+                                    const a = document.createElement('a');
+                                    a.href = url;
+                                    a.download = file.originalName || 'download';
+                                    a.click();
+                                    URL.revokeObjectURL(url);
+                                } catch {
+                                    window.open(file.url, '_blank');
+                                } finally {
+                                    setDownloading(false);
+                                }
+                            }}
+                            disabled={downloading}
+                            className="p-2 text-gray-400 hover:text-emerald-400 hover:bg-emerald-500/10 rounded-lg transition disabled:opacity-50"
+                            title={downloading ? 'Downloading...' : 'Download'}
+                        >
+                            {downloading ? <span className="animate-spin inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full" /> : <FaDownload size={16} />}
+                        </button>
+                    </div>
+
+                    <div className="flex gap-2">
+                        {/* Share Button (Only Owner) */}
+                        {isOwner && (
+                            <button
+                                onClick={() => onShare(file)}
+                                className="p-2 bg-emerald-500/10 hover:bg-emerald-500 text-emerald-400 hover:text-white rounded-lg transition shadow-sm"
+                                title="Share"
+                            >
+                                <FaShareAlt size={14} />
+                            </button>
+                        )}
+
+                        {/* Delete Button (Owner or Editor) - Always Visible */}
+                        {canDelete && (
+                            <button
+                                onClick={() => onDelete(file)}
+                                className="p-2 bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-white rounded-lg transition shadow-sm"
+                                title="Delete"
+                            >
+                                <FaTrash size={14} />
+                            </button>
+                        )}
+                    </div>
                 </div>
-            </div>
-        </motion.div>
+            </motion.div>
+        </>
     );
 };
 

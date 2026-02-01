@@ -2,29 +2,142 @@
 @import "tailwindcss";
 
 :root {
+    /* Color Palette - Restoring Blue/Slate Theme */
     --bg-dark: #0f172a;
     --bg-card: #1e293b;
     --primary: #3b82f6;
-    --primary-glow: rgba(59, 130, 246, 0.5);
+
+    /* Mapping New System to Old Colors */
+    --bg-primary: #0f172a;
+    /* Slate 900 */
+    --bg-secondary: #1e293b;
+    /* Slate 800 */
+
+    /* Glass Vars */
+    --glass-bg: rgba(30, 41, 59, 0.7);
+    /* Slate 800 with opacity */
+    --glass-border: rgba(255, 255, 255, 0.1);
+
+    --text-primary: #f1f5f9;
+    --text-secondary: #94a3b8;
+
+    --accent-gradient: linear-gradient(135deg, #3b82f6, #6366f1);
+    /* Blue to Indigo */
+
+    /* Motion */
+    --duration-fast: 120ms;
+    --duration-normal: 220ms;
+    --duration-slow: 350ms;
+    --ease-out: cubic-bezier(0.215, 0.61, 0.355, 1);
 }
 
 body {
     font-family: 'Outfit', sans-serif;
-    background-color: var(--bg-dark);
-    color: #f1f5f9;
-    overflow-x: hidden;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    /* Mobile Height Fix */
+    min-height: 100dvh;
 }
 
+/* Glassmorphism System - Adjusted for Blue/Slate */
 .glass-panel {
-    background: rgba(30, 41, 59, 0.7);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
 }
 
-.gradient-text {
-    background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
+.glass-card {
+    background: rgba(30, 41, 59, 0.5);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 1rem;
+    transition: all var(--duration-normal) var(--ease-out);
+}
+
+.glass-card:hover {
+    background: rgba(30, 41, 59, 0.8);
+    border-color: rgba(59, 130, 246, 0.3);
+    /* Blue border on hover */
+    transform: translateY(-2px);
+}
+
+/* Utility Components */
+.btn-primary {
+    background: var(--accent-gradient);
+    color: white;
+    font-weight: 600;
+    transition: all var(--duration-fast);
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-primary:hover {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.btn-secondary {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-primary);
+    border: 1px solid var(--glass-border);
+    font-weight: 500;
+    transition: all var(--duration-fast);
+}
+
+.btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.btn-danger {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    transition: all var(--duration-fast);
+}
+
+.btn-danger:hover {
+    background: rgba(239, 68, 68, 0.2);
+    color: #f87171;
+}
+
+.input-glass {
+    background: rgba(15, 23, 42, 0.6);
+    /* Darker input bg */
+    border: 1px solid var(--glass-border);
+    color: var(--text-primary);
+    border-radius: 0.75rem;
+    padding: 0.75rem 1rem;
+    width: 100%;
+    transition: all var(--duration-fast);
+}
+
+.input-glass:focus {
+    outline: none;
+    border-color: #3b82f6;
+    /* Blue border focus */
+    background: rgba(15, 23, 42, 0.8);
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--bg-quaternary);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--accent-primary);
 }

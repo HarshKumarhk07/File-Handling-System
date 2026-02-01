@@ -52,28 +52,31 @@ const Register = () => {
     };
 
     return (
-        <div className="flex justify-center items-center min-h-screen relative overflow-hidden bg-gray-900 px-4">
-            {/* Background Elements */}
-            <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-emerald-600 blur-[120px] opacity-20 animate-pulse"></div>
-            <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-blue-600 blur-[120px] opacity-20 animate-pulse delay-1000"></div>
+        <div className="flex justify-center items-center min-h-screen relative overflow-hidden px-4">
+            {/* Background Texture Configured in Body */}
+            <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-blue-600/20 blur-[120px] animate-pulse"></div>
+            <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-indigo-600/10 blur-[120px] animate-pulse delay-1000"></div>
 
             <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5 }}
-                className="glass-panel p-6 sm:p-10 rounded-2xl shadow-2xl w-full max-w-[400px] sm:max-w-md relative z-10"
+                initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                transition={{ duration: 0.5, ease: "easeOut" }}
+                className="glass-panel p-8 sm:p-10 rounded-3xl w-full max-w-[420px] relative z-10 border border-white/10 shadow-2xl"
             >
                 <div className="text-center mb-8">
-                    <h2 className="text-3xl sm:text-4xl font-bold text-white mb-2 tracking-tight">Join Us</h2>
-                    <p className="text-gray-400">Create your account today</p>
+                    <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 mb-4 shadow-lg shadow-blue-500/20">
+                        <h1 className="text-2xl font-bold text-white">M</h1>
+                    </div>
+                    <h2 className="text-3xl font-bold text-white mb-2 tracking-tight">Create Account</h2>
+                    <p className="text-gray-400 text-sm">Join to start securing your files</p>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-5">
                     <div>
-                        <label className="block text-gray-300 mb-2 text-sm font-medium">Full Name</label>
+                        <label className="block text-gray-400 mb-2 text-sm font-medium ml-1">Full Name</label>
                         <input
                             type="text"
-                            className="w-full bg-gray-800/50 border border-gray-600 text-white rounded-xl p-3.5 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all placeholder-gray-500"
+                            className="input-glass"
                             placeholder="John Doe"
                             value={name}
                             onChange={(e) => setName(e.target.value)}
@@ -82,10 +85,10 @@ const Register = () => {
                         />
                     </div>
                     <div>
-                        <label className="block text-gray-300 mb-2 text-sm font-medium">Email Address</label>
+                        <label className="block text-gray-400 mb-2 text-sm font-medium ml-1">Email Address</label>
                         <input
                             type="email"
-                            className="w-full bg-gray-800/50 border border-gray-600 text-white rounded-xl p-3.5 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all placeholder-gray-500"
+                            className="input-glass"
                             placeholder="name@example.com"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
@@ -94,11 +97,11 @@ const Register = () => {
                         />
                     </div>
                     <div>
-                        <label className="block text-gray-300 mb-2 text-sm font-medium">Password</label>
+                        <label className="block text-gray-400 mb-2 text-sm font-medium ml-1">Password</label>
                         <div className="relative">
                             <input
                                 type={showPassword ? 'text' : 'password'}
-                                className="w-full bg-gray-800/50 border border-gray-600 text-white rounded-xl p-3.5 pr-12 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all placeholder-gray-500"
+                                className="input-glass pr-12"
                                 placeholder="••••••••"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
@@ -108,7 +111,7 @@ const Register = () => {
                             <button
                                 type="button"
                                 onClick={() => setShowPassword(!showPassword)}
-                                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-300 transition"
+                                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition"
                                 tabIndex={-1}
                                 aria-label={showPassword ? 'Hide password' : 'Show password'}
                                 disabled={loading}
@@ -120,7 +123,7 @@ const Register = () => {
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold py-3.5 rounded-xl transition-all transform hover:scale-[1.02] shadow-lg shadow-emerald-500/25 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"
+                        className="btn-primary w-full py-3.5 rounded-xl text-lg shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2 disabled:opacity-70 disabled:filter-none"
                     >
                         {loading ? (
                             <>
@@ -133,7 +136,13 @@ const Register = () => {
                     </button>
                 </form>
                 <p className="text-gray-400 mt-8 text-center text-sm">
-                    Already have an account? <Link to="/login" className="text-emerald-400 hover:text-emerald-300 font-medium transition-colors">Sign in</Link>
+                    Already have an account?{' '}
+                    <span
+                        onClick={() => navigate('/login')}
+                        className="text-blue-400 hover:text-blue-300 font-semibold cursor-pointer transition-colors"
+                    >
+                        Sign In
+                    </span>
                 </p>
             </motion.div>
         </div>

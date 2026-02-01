@@ -8,16 +8,24 @@ cloudinary.config({
     api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
-const uploadToCloudinary = (fileBuffer, userId, originalName) => {
+const uploadToCloudinary = (fileBuffer, userId, originalName, mimetype) => {
     return new Promise((resolve, reject) => {
+        const isImage = mimetype && mimetype.startsWith('image/');
+
+        const options = {
+            folder: `minidrive/${userId}`,
+            resource_type: isImage ? 'auto' : 'raw', // Use 'raw' for non-images to prevent corruption
+            public_id: originalName.split('.')[0] + '_' + Date.now(),
+        };
+
+        // Only apply image-specific optimizations
+        if (isImage) {
+            options.format = 'webp';
+            options.quality = 'auto';
+        }
+
         const uploadStream = cloudinary.uploader.upload_stream(
-            {
-                folder: `minidrive/${userId}`,
-                resource_type: 'auto',
-                public_id: originalName.split('.')[0] + '_' + Date.now(),
-                format: 'webp', // Optimization: Auto convert to WebP
-                quality: 'auto' // Optimization: Auto quality
-            },
+            options,
             (error, result) => {
                 if (error) return reject(error);
                 resolve(result);

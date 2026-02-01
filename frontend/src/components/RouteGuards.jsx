@@ -10,6 +10,17 @@ export const ProtectedRoute = () => {
     return user ? <Outlet /> : <Navigate to="/login" replace />;
 };
 
+export const PublicRoute = () => {
+    const { user } = useContext(AuthContext);
+
+    // If user is authenticated, redirect to dashboard
+    if (user && user.token) {
+        return <Navigate to="/dashboard" replace />;
+    }
+
+    return <Outlet />;
+};
+
 export const AdminRoute = () => {
     const { user, loading } = useContext(AuthContext);
 

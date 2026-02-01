@@ -78,9 +78,9 @@ const PreviewModal = ({ isOpen, onClose, file }) => {
                                 />
                             ) : isPdf ? (
                                 <iframe
-                                    src={file.url}
+                                    src={`https://docs.google.com/gview?url=${encodeURIComponent(file.url)}&embedded=true`}
                                     title={file.originalName}
-                                    className="w-full h-[70vh] min-h-[500px] rounded-lg border-0"
+                                    className="w-full h-[70vh] min-h-[500px] rounded-lg border-0 bg-white"
                                 />
                             ) : (
                                 <div className="text-center py-12">
