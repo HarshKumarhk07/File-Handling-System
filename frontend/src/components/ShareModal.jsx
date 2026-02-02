@@ -137,8 +137,8 @@ const ShareModal = ({ isOpen, onClose, file, onShareSuccess }) => {
                                     onChange={(e) => setPermission(e.target.value)}
                                     className="w-full bg-gray-900 border border-gray-600 text-white rounded-lg p-3 focus:ring-2 focus:ring-blue-500 outline-none"
                                 >
-                                    <option value="view">Can View (Read Only)</option>
-                                    <option value="edit">Can Edit (Delete)</option>
+                                    <option value="view">View (Read Only)</option>
+                                    <option value="edit">Edit (Delete)</option>
                                 </select>
                             </div>
 
